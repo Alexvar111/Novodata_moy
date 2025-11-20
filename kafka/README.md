@@ -34,7 +34,7 @@ SELECT sent_to_kafka, COUNT(*) FROM user_logins GROUP BY sent_to_kafka;
 
 7. Проверка в ClickHouse:
 SELECT sent_to_kafka, COUNT(*) FROM user_logins GROUP BY sent_to_kafka;
-Количество `TRUE` должно соответствовать PostgreSQL, а при повторных запусках миграционного продюсера новые дубли не появляются.
+Количество `TRUE` должно соответствовать PostgreSQL, а при повторных запусках миграционного продюсера новые дубли не появляются
 
 
 
