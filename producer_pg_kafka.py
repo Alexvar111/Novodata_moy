@@ -14,19 +14,16 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
-# 1. Гарантируем, что колонка есть
 cursor.execute("""
 ALTER TABLE user_logins
     ADD COLUMN IF NOT EXISTS sent_to_kafka BOOLEAN;
 """)
 
-# 2. Гарантируем default FALSE для новых строк
 cursor.execute("""
 ALTER TABLE user_logins
     ALTER COLUMN sent_to_kafka SET DEFAULT FALSE;
 """)
 
-# 3. Инициализируем старые NULL как FALSE (однажды)
 cursor.execute("""
 UPDATE user_logins
 SET sent_to_kafka = FALSE
@@ -34,7 +31,7 @@ WHERE sent_to_kafka IS NULL;
 """)
 conn.commit()
 
-# 4. Берём только записи, которые ещё не отправлялись в Kafka
+
 cursor.execute("""
     SELECT id, username, event_type, extract(epoch FROM event_time)
     FROM user_logins
@@ -53,11 +50,11 @@ for row in rows:
         "sent_to_kafka": True
     }
 
-    # Отправляем в Kafka
+  
     producer.send("user_events_to_clickhouse", value=data)
     producer.flush()
 
-    # Помечаем запись как отправленную
+    
     cursor.execute(
         "UPDATE user_logins SET sent_to_kafka = TRUE WHERE id = %s",
         (row_id,)
